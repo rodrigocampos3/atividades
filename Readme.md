@@ -18,19 +18,34 @@ Siga os passos abaixo para criar a função Lambda e o API Gateway:
     - Navegue até o serviço AWS Lambda.
     - Clique em "Criar função" e selecione "Autor de Funções" adequado (por exemplo, "Author from scratch").
     - Configure as opções da função, como nome, runtime (Python, Node.js, etc.), e permissões.
-    - Escreva ou faça upload do código da função.
-    - Clique em "Criar função" para criar a função Lambda.
+    - Cole o codigo abaixo:
+    -
+   ```python
+    import json
 
-2. **Configuração de Variáveis de Ambiente (Opcional):**
-
-    - Se a sua função depende de variáveis de ambiente, configure-as na guia "Variáveis de Ambiente" da função Lambda no Console da AWS.
+    def lambda_handler(event, context):
+        headers = event.get('headers', {})
+        codigo_autenticacao_esperado = "userAutenticado"
+        if 'Codigo-Autenticacao' in headers and headers['Codigo-Autenticacao'] == codigo_autenticacao_esperado:
+            return {
+                'statusCode': 200,
+                'body': event["body"]
+            }
+        else:
+            return {
+                'statusCode': 401,
+                'body': json.dumps({'message': 'Acesso não autorizado'})
+            }
+    ```
+O código acima trata-se de uma requisição POST que recebe um JSON e, em seguida, retorna o mesmo JSON. Para acessar a rota, é necessário que o cabeçalho contenha a chave "Codigo-Autenticacao" com o valor correto, que seria "userAutenticado".
+  - Clique em "Criar função" para criar a função Lambda.
 
 3. **Criação do API Gateway:**
 
     - Acesse o Console da AWS.
     - Navegue até o serviço Amazon API Gateway.
     - Clique em "Criar API".
-    - Escolha o tipo de API que você deseja criar (por exemplo, REST API).
+    - Escolha o tipo de REST API
     - Configure as opções da API, como nome e descrição.
     - Crie um recurso e um método para a API.
     - Associe o método à função Lambda criada anteriormente.
@@ -38,12 +53,17 @@ Siga os passos abaixo para criar a função Lambda e o API Gateway:
 
 4. **Teste da API:**
 
-    - Teste a API usando o URL de invocação fornecido pelo API Gateway.
+     ```bash
+        curl -X POST -H "Content-Type: application/json" -H "Codigo-Autenticacao: userAutenticado" -d '{"chave1": "valor1", "chave2": "valor2"}' https://sua-url-da-api-gateway.execute-api.sua-regiao.amazonaws.com/seu-recurso
+é esperado que receba o json com os valor da chave1 e chave2 como resposta, caso isso ocorra está tudo certo com sua função
 
-5. **Monitoramento e Logs:**
 
-    - Configure o monitoramento e visualize os logs da função Lambda e do API Gateway no CloudWatch.
+5. **Teste da minha lambda function**
 
+    ```bash
+       curl -X POST -H "Content-Type: application/json" -H "Codigo-Autenticacao: userAutenticado" -d '{"chave1": "valor1", "chave2": "valor2"}' https://puija78sw4.execute-api.us-east-1.amazonaws.com/default/MansurPost
+
+Copie e cole este CURL no postman para testar minha função, caso os valores de chave1 e chave2 sejam retornados deu tudo certo, tente alterar o codigo de autencicação e verá que a requisição será bloqueada
 ## Recursos Adicionais
 
 - [Documentação oficial da AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
@@ -51,5 +71,5 @@ Siga os passos abaixo para criar a função Lambda e o API Gateway:
 
 ## Autores
 
-- Nome do autor
+- Rodrigo Campos Rodrigues
 
